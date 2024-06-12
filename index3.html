@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página 1 - Calculadora de Resultados</title>
+<style>
+    .container {
+        margin: 20px 0;
+    }
+    .button {
+        cursor: pointer;
+        padding: 10px 20px;
+        border: none;
+        background-color: #007BFF;
+        color: white;
+        font-size: 16px;
+        margin-right: 10px;
+    }
+    h1 {
+        color: red;
+        font-size: 40px;
+        text-align: center;
+        padding: 10px;
+    }
+    body {
+        background-color: bisque;
+    }
+    p {
+        font-size: 20px;
+        color: darkblue;
+    }
+    nav ul {
+        list-style: none;
+        padding: 0;
+    }
+    nav ul li {
+        display: inline;
+        margin-right: 10px;
+    }
+    .button{
+        background-color: #490202;
+        margin: 5px;
+        font-size: 20px;
+    }
+</style>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href="index.html">Principal</a></li>
+        <li><a href="index1.html">Página 1</a></li>
+        <li><a href="index2.html">Página 2</a></li>
+        <li><a href="index3.html">Página 3</a></li>
+        <li><a href="index4.html">Página 4</a></li>
+        <li><a href="index5.html">Página 5</a></li>
+    </ul>
+</nav>
+
+<h1>Filete</h1>
+
+<div class="container">
+    <label for="decimalInput">Ingrese Bs ganados:</label>
+    <input type="number" id="decimalInput" step="any">
+    <button class="button" id="okButton">OK</button>
+    <button class="button" id="undoButton">Deshacer Última Entrada</button>
+    <button class="button" id="redoButton">Rehacer Última Entrada</button>
+    <button class="button" id="resetButton">Resetear Totales</button>
+</div>
+
+<p>Bs Total Ganados: <span id="result1">0</span></p>
+<p>KG Vendidos: <span id="result2">0</span></p>
+
+<script>
+    const pageId = 'index3.html'; // Cambiar este ID para cada página
+    let lastDecimal = null;
+    let lastUndoDecimal = null;
+    let result1Total = parseFloat(localStorage.getItem(`${pageId}_result1Total`)) || 0;
+    let result2Total = parseFloat(localStorage.getItem(`${pageId}_result2Total`)) || 0;
+
+    document.getElementById('result1').textContent = result1Total.toFixed(2);
+    document.getElementById('result2').textContent = result2Total.toFixed(2);
+
+    document.getElementById('okButton').addEventListener('click', function() {
+        const number = parseFloat(document.getElementById('decimalInput').value);
+        if (!isNaN(number)) {
+            lastDecimal = number;
+            lastUndoDecimal = null;  // Reset lastUndoDecimal on new entry
+            updateResults(number);
+            document.getElementById('decimalInput').value = '';
+        }
+    });
+
+    function updateResults(number) {
+        result1Total += number;
+        const kg = calculateKg(number);
+
+        result2Total += kg;
+
+        document.getElementById('result1').textContent = result1Total.toFixed(2);
+        document.getElementById('result2').textContent = result2Total.toFixed(2);
+
+        localStorage.setItem(`${pageId}_result1Total`, result1Total.toFixed(2));
+        localStorage.setItem(`${pageId}_result2Total`, result2Total.toFixed(2));
+    }
+
+    function calculateKg(number) {
+        const bsPerKg = 28;
+        return number / bsPerKg;
+    }
+
+    document.getElementById('undoButton').addEventListener('click', function() {
+        if (lastDecimal !== null) {
+            result1Total -= lastDecimal;
+            const kg = calculateKg(lastDecimal);
+
+            result2Total -= kg;
+
+            document.getElementById('result1').textContent = result1Total.toFixed(2);
+            document.getElementById('result2').textContent = result2Total.toFixed(2);
+
+            localStorage.setItem(`${pageId}_result1Total`, result1Total.toFixed(2));
+            localStorage.setItem(`${pageId}_result2Total`, result2Total.toFixed(2));
+
+            lastUndoDecimal = lastDecimal;
+            lastDecimal = null;
+        }
+    });
+
+    document.getElementById('redoButton').addEventListener('click', function() {
+        if (lastUndoDecimal !== null) {
+            updateResults(lastUndoDecimal);
+            lastDecimal = lastUndoDecimal;
+            lastUndoDecimal = null;
+        }
+    });
+
+    document.getElementById('resetButton').addEventListener('click', function() {
+        result1Total = 0;
+        result2Total = 0;
+        document.getElementById('result1').textContent = '0';
+        document.getElementById('result2').textContent = '0';
+        localStorage.removeItem(`${pageId}_result1Total`);
+        localStorage.removeItem(`${pageId}_result2Total`);
+        lastDecimal = null;
+        lastUndoDecimal = null;
+    });
+</script>
+
+</body>
+</html>
